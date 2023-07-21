@@ -195,12 +195,12 @@ Board::Board() {
 	window.create(VideoMode(960, 437), "Game");
 	window.setPosition(sf::Vector2i(100, 50));
 	swap_make_chain = false;
-	files_name[0] = "images/Candies/Green.png";
-	files_name[1] = "images/Candies/Purple.png";
-	files_name[2] = "images/Candies/Orange.png";
-	files_name[3] = "images/Candies/Yellow.png";
-	files_name[4] = "images/Candies/Red.png";
-	files_name[5] = "images/Candies/Blue.png";
+	files_name[0] = "images/png/hat.png";
+	files_name[1] = "images/png/clothes.png";
+	files_name[2] = "images/png/latern.png";
+	files_name[3] = "images/png/kit.png";
+	files_name[4] = "images/png/pack.png";
+	files_name[5] = "images/png/telescope.png";
 }
 void Board::load() {
     srand(time(NULL));
@@ -211,21 +211,21 @@ void Board::load() {
 	/******************************消除第一次随机生成方块后产生的3连情况（同时消除了更多的情况）******************************/
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 3; j++) {
-			if (sprites[i][j].name == "images/Candies/Green.png" && sprites[i][j + 1].name == "images/Candies/Green.png"&& sprites[i][j + 2].name == "images/Candies/Green.png") sprites[i][j].name = "images/Candies/Purple.png";
-			else if (sprites[i][j].name == "images/Candies/Purple.png" && sprites[i][j + 1].name == "images/Candies/Purple.png" && sprites[i][j + 2].name == "images/Candies/Purple.png") sprites[i][j].name = "images/Candies/Orange.png";
-			else if (sprites[i][j].name == "images/Candies/Orange.png" && sprites[i][j + 1].name == "images/Candies/Orange.png" && sprites[i][j + 2].name == "images/Candies/Orange.png") sprites[i][j].name = "images/Candies/Yellow.png";
-			else if (sprites[i][j].name == "images/Candies/Yellow.png" && sprites[i][j + 1].name == "images/Candies/Yellow.png" && sprites[i][j + 2].name == "images/Candies/Yellow.png") sprites[i][j].name = "images/Candies/Red.png";
-			else if (sprites[i][j].name == "images/Candies/Red.png" && sprites[i][j + 1].name == "images/Candies/Red.png" && sprites[i][j + 2].name == "images/Candies/Red.png") sprites[i][j].name = "images/Candies/Blue.png";
-			else if (sprites[i][j].name == "images/Candies/Blue.png" && sprites[i][j + 1].name == "images/Candies/Blue.png" && sprites[i][j + 2].name == "images/Candies/Blue.png") sprites[i][j].name = "images/Candies/Green.png";
+			if (sprites[i][j].name == "images/png/hat.png" && sprites[i][j + 1].name == "images/png/hat.png"&& sprites[i][j + 2].name == "images/png/hat.png") sprites[i][j].name = "images/png/clothes.png";
+			else if (sprites[i][j].name == "images/png/clothes.png" && sprites[i][j + 1].name == "images/png/clothes.png" && sprites[i][j + 2].name == "images/png/clothes.png") sprites[i][j].name = "images/png/latern.png";
+			else if (sprites[i][j].name == "images/png/latern.png" && sprites[i][j + 1].name == "images/png/latern.png" && sprites[i][j + 2].name == "images/png/latern.png") sprites[i][j].name = "images/png/kit.png";
+			else if (sprites[i][j].name == "images/png/kit.png" && sprites[i][j + 1].name == "images/png/kit.png" && sprites[i][j + 2].name == "images/png/kit.png") sprites[i][j].name = "images/png/pack.png";
+			else if (sprites[i][j].name == "images/png/pack.png" && sprites[i][j + 1].name == "images/png/pack.png" && sprites[i][j + 2].name == "images/png/pack.png") sprites[i][j].name = "images/png/telescope.png";
+			else if (sprites[i][j].name == "images/png/telescope.png" && sprites[i][j + 1].name == "images/png/telescope.png" && sprites[i][j + 2].name == "images/png/telescope.png") sprites[i][j].name = "images/png/hat.png";
 		}
 	for (int j = 0; j < 5; j++)
 		for (int i = 0; i < 6; i++) {
-			if (sprites[i][j].name == "images/Candies/Green.png" && sprites[i+1][j].name == "images/Candies/Green.png"&& sprites[i+2][j].name == "images/Candies/Green.png") sprites[i][j].name = "images/Candies/Purple.png";
-			else if (sprites[i][j].name == "images/Candies/Purple.png" && sprites[i+1][j].name == "images/Candies/Purple.png" && sprites[i+2][j].name == "images/Candies/Purple.png") sprites[i][j].name = "images/Candies/Orange.png";
-			else if (sprites[i][j].name == "images/Candies/Orange.png" && sprites[i+1][j].name == "images/Candies/Orange.png" && sprites[i+2][j].name == "images/Candies/Orange.png") sprites[i][j].name = "images/Candies/Yellow.png";
-			else if (sprites[i][j].name == "images/Candies/Yellow.png" && sprites[i+1][j].name == "images/Candies/Yellow.png" && sprites[i+2][j].name == "images/Candies/Yellow.png") sprites[i][j].name = "images/Candies/Red.png";
-			else if (sprites[i][j].name == "images/Candies/Red.png" && sprites[i+1][j].name == "images/Candies/Red.png" && sprites[i + 2][j].name == "images/Candies/Red.png") sprites[i][j].name = "images/Candies/Blue.png";
-			else if (sprites[i][j].name == "images/Candies/Blue.png" && sprites[i+1][j].name == "images/Candies/Blue.png" && sprites[i + 2][j].name == "images/Candies/Blue.png") sprites[i][j].name = "images/Candies/Green.png";
+			if (sprites[i][j].name == "images/png/hat.png" && sprites[i+1][j].name == "images/png/hat.png"&& sprites[i+2][j].name == "images/png/hat.png") sprites[i][j].name = "images/png/clothes.png";
+			else if (sprites[i][j].name == "images/png/clothes.png" && sprites[i+1][j].name == "images/png/clothes.png" && sprites[i+2][j].name == "images/png/clothes.png") sprites[i][j].name = "images/png/latern.png";
+			else if (sprites[i][j].name == "images/png/latern.png" && sprites[i+1][j].name == "images/png/latern.png" && sprites[i+2][j].name == "images/png/latern.png") sprites[i][j].name = "images/png/kit.png";
+			else if (sprites[i][j].name == "images/png/kit.png" && sprites[i+1][j].name == "images/png/kit.png" && sprites[i+2][j].name == "images/png/kit.png") sprites[i][j].name = "images/png/pack.png";
+			else if (sprites[i][j].name == "images/png/pack.png" && sprites[i+1][j].name == "images/png/pack.png" && sprites[i + 2][j].name == "images/png/pack.png") sprites[i][j].name = "images/png/telescope.png";
+			else if (sprites[i][j].name == "images/png/telescope.png" && sprites[i+1][j].name == "images/png/telescope.png" && sprites[i + 2][j].name == "images/png/telescope.png") sprites[i][j].name = "images/png/hat.png";
 		}
 
 	for (int i = 0; i < 8; i++) 
