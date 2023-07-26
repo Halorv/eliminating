@@ -87,7 +87,9 @@ bool Board::Check_col_remove(int col) { // 检查列上有没有消除链
 	int cnt = 0; // 最长消除链的长度（超过3的）
 	bool again = false;
 	for (int i = 2; i < 8; i++)
+		
 		if (sprites[i][col].name == sprites[i - 1][col].name && sprites[i][col].name == sprites[i - 2][col].name) {
+			
 			again = true; // 是否连续消除
 			Bonous_m.increment();
 			//Bonous_m.start_again();
@@ -123,6 +125,7 @@ bool Board::Check_col_remove(int col) { // 检查列上有没有消除链
 }
 
 bool Board::Check_row_remove(int row) {
+	int keycol = -1;//发生特殊消除的列
 	int cnt = 0;
 	bool again = false;
 	for (int i = 2; i < 5; i++) {
@@ -136,45 +139,126 @@ bool Board::Check_row_remove(int row) {
 			while (tempI + 1 < 5 && sprites[row][tempI].name == sprites[row][tempI + 1].name)
 				cnt++, tempI++;
 
+			for (int j = i; j < i + cnt + 3; j++) {
+				if (sprites[row][j].name == sprites[row - 1][j].name && sprites[row][j].name == sprites[row + 1][j].name){
+					keycol = j;
+					Generate_explosion_at(3, 'c', row-1, j);
+					for (int k = row+1; k >= 0; k--) // 方块从上往下掉落
+						if (valid_index_array(k - 3, j)) {
+							sprites[k][j].name = sprites[k - 3 ][j].name;
+							sprites[k][j].t = sprites[k - 3 ][j].t;
+						}
+						else {
+							sprites[k][j].name = files_name[Generate_candy()]; // 随机生成方块
+							sprites[k][j].t.loadFromFile(sprites[k][j].name);
+						}
+					score_m.Increment_by(30);
+				}
+				else if (sprites[row][j].name == sprites[row - 1][j].name && sprites[row][j].name == sprites[row - 2][j].name) {
+					keycol = j;
+					Generate_explosion_at(3, 'c', row-2, j);
+					for (int k = row; k >= 0; k--) // 方块从上往下掉落
+						if (valid_index_array(k - 3, j)) {
+							sprites[k][j].name = sprites[k - 3][j].name;
+							sprites[k][j].t = sprites[k - 3][j].t;
+						}
+						else {
+							sprites[k][j].name = files_name[Generate_candy()]; // 随机生成方块
+							sprites[k][j].t.loadFromFile(sprites[k][j].name);
+						}
+					score_m.Increment_by(30);
+				}
+				else if (sprites[row][j].name == sprites[row + 1][j].name && sprites[row][j].name == sprites[row + 2][j].name) {
+					keycol = j;
+					Generate_explosion_at(3, 'c', row, j);
+					for (int k = row + 2; k >= 0; k--) // 方块从上往下掉落
+						if (valid_index_array(k - 3, j)) {
+							sprites[k][j].name = sprites[k - 3][j].name;
+							sprites[k][j].t = sprites[k - 3][j].t;
+						}
+						else {
+							sprites[k][j].name = files_name[Generate_candy()]; // 随机生成方块
+							sprites[k][j].t.loadFromFile(sprites[k][j].name);
+						}
+					score_m.Increment_by(30);
+				}
+			}
+
 			swap_make_chain = true;
 			S_M.remove_sound.play();
 
 			Generate_explosion_at(cnt + 3, 'r', row, i - 2);
 
-			while (row) { // 从下往上逐行处理
-				/****************消除旧的方块****************/
-				if (cnt > 0) { // 4连
-					sprites[row][i + 1].t = sprites[row - 1][i + 1].t;
-					sprites[row][i + 1].name = sprites[row - 1][i + 1].name;
-					if (cnt > 1) { // 5连
-						sprites[row][i + 2].t = sprites[row - 1][i + 2].t;
-						sprites[row][i + 2].name = sprites[row - 1][i + 2].name;
+			if (keycol == -1) {
+				while (row) { // 从下往上逐行处理
+					/****************消除旧的方块****************/
+					if (cnt > 0) { // 4连
+						sprites[row][i + 1].t = sprites[row - 1][i + 1].t;
+						sprites[row][i + 1].name = sprites[row - 1][i + 1].name;
+						if (cnt > 1) { // 5连
+							sprites[row][i + 2].t = sprites[row - 1][i + 2].t;
+							sprites[row][i + 2].name = sprites[row - 1][i + 2].name;
+						}
+					}
+					sprites[row][i].t = sprites[row - 1][i].t;
+					sprites[row][i].name = sprites[row - 1][i].name;
+					sprites[row][i - 1].t = sprites[row - 1][i - 1].t;
+					sprites[row][i - 1].name = sprites[row - 1][i - 1].name;
+					sprites[row][i - 2].t = sprites[row - 1][i - 2].t;
+					sprites[row][i - 2].name = sprites[row - 1][i - 2].name;
+					row--;
+				}
+				/****************产生新的方块****************/
+				if (cnt > 0) {
+					sprites[row][i + 1].name = files_name[Generate_candy()];
+					sprites[row][i + 1].t.loadFromFile(sprites[row][i + 1].name);
+					if (cnt > 1) {
+						sprites[row][i + 2].name = files_name[Generate_candy()];
+						sprites[row][i + 2].t.loadFromFile(sprites[row][i + 2].name);
 					}
 				}
-				sprites[row][i].t = sprites[row - 1][i].t;
-				sprites[row][i].name = sprites[row - 1][i].name;
-				sprites[row][i - 1].t = sprites[row - 1][i - 1].t;
-				sprites[row][i - 1].name = sprites[row - 1][i - 1].name;
-				sprites[row][i - 2].t = sprites[row - 1][i - 2].t;
-				sprites[row][i - 2].name = sprites[row - 1][i - 2].name;
-				row--;
+				sprites[row][i].name = files_name[Generate_candy()];
+				sprites[row][i].t.loadFromFile(sprites[row][i].name);
+				sprites[row][i - 1].name = files_name[Generate_candy()];
+				sprites[row][i - 1].t.loadFromFile(sprites[row][i - 1].name);
+				sprites[row][i - 2].name = files_name[Generate_candy()];
+				sprites[row][i - 2].t.loadFromFile(sprites[row][i - 2].name);
 			}
-			/****************产生新的方块****************/
-			if (cnt > 0) {
-				sprites[row][i + 1].name = files_name[Generate_candy()];
-				sprites[row][i + 1].t.loadFromFile(sprites[row][i + 1].name);
-				if (cnt > 1) {
-					sprites[row][i + 2].name = files_name[Generate_candy()];
-					sprites[row][i + 2].t.loadFromFile(sprites[row][i + 2].name);
+			else {
+				while (row) { // 从下往上逐行处理
+					/****************消除旧的方块****************/
+					if (i != keycol) {
+						sprites[row][i].t = sprites[row - 1][i].t;
+						sprites[row][i].name = sprites[row - 1][i].name;
+					}
+					if (i - 1 != keycol) {
+						sprites[row][i - 1].t = sprites[row - 1][i - 1].t;
+						sprites[row][i - 1].name = sprites[row - 1][i - 1].name;
+					}
+					if (i - 2 != keycol) {
+						sprites[row][i - 2].t = sprites[row - 1][i - 2].t;
+						sprites[row][i - 2].name = sprites[row - 1][i - 2].name;
+						
+					}
+					row--;
 				}
+				/****************产生新的方块****************/
+				if (i != keycol) {
+					sprites[row][i].name = files_name[Generate_candy()];
+					sprites[row][i].t.loadFromFile(sprites[row][i].name);
+				}
+				if (i - 1 != keycol) {
+					sprites[row][i - 1].name = files_name[Generate_candy()];
+					sprites[row][i - 1].t.loadFromFile(sprites[row][i - 1].name);
+				}
+				if (i - 2 != keycol) {
+					sprites[row][i - 2].name = files_name[Generate_candy()];
+					sprites[row][i - 2].t.loadFromFile(sprites[row][i - 2].name);
+				}
+				
+				
+			
 			}
-			sprites[row][i].name = files_name[Generate_candy()];
-			sprites[row][i].t.loadFromFile(sprites[row][i].name);
-			sprites[row][i - 1].name = files_name[Generate_candy()];
-			sprites[row][i - 1].t.loadFromFile(sprites[row][i - 1].name);
-			sprites[row][i - 2].name = files_name[Generate_candy()];
-			sprites[row][i - 2].t.loadFromFile(sprites[row][i - 2].name);
-
 			score_m.Increment_by(30 + 10 * cnt);
 			Sleep(800);
 			window.clear();
