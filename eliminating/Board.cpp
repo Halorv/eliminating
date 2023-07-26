@@ -422,3 +422,63 @@ void Board::draw() {
 			window.draw(sprites[i][j].s);
 		}
 }
+
+/*	我实力不够，从CSDN上抄抄改改的
+	以下是自动检测死地图重排
+	我不会设计新UI，所以没设计一键重排
+*/
+bool Board::check_end() {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 5; j++) {
+			if (i < 6 &&
+				sprites[i][j].name == sprites[i + 1][j].name &&
+				sprites[i + 1][j].name == sprites[i + 2][j].name
+				) {
+				return false;
+			}
+			if (j < 3 &&
+				sprites[i][j].name == sprites[i][j + 1].name &&
+				sprites[i][j + 1].name == sprites[i][j + 2].name
+				) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+void Board::exchange_check() {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 4; j++) {
+			char temp = sprites[i][j].type;
+			sprites[i][j].type = sprites[i][j + 1].type;
+			sprites[i][j + 1].type = temp;
+
+			bool end = check_end();
+			if (!end) {
+				return;
+			}
+
+			sprites[i][j + 1].type = sprites[i][j].type;
+			sprites[i][j].type = temp;
+		}
+	}
+
+	for (int k = 0; k < 7; k++) {
+		for (int l = 0; l < 5; l++) {
+			char temp2 = sprites[k][l].type;
+			sprites[k][l].type = sprites[k + 1][l].type;
+			sprites[k + 1][l].type = temp2;
+
+			bool end2 = check_end();
+			if (!end2) {
+				return;
+			}
+
+			sprites[k + 1][l].type = sprites[k][l].type;
+			sprites[k][l].type = temp2;
+		}
+	}
+
+	load();
+}

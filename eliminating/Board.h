@@ -37,4 +37,6 @@ public:
 	bool valid_cell_window_domain(int x, int y);
 	bool valid_index_array(int r, int c);
 	void Generate_explosion_at(int cnt, char type, int r, int c);
+	bool check_end();
+	void exchange_check();
 };
