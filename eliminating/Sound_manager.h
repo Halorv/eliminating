@@ -4,7 +4,6 @@ using namespace std;
 using namespace sf;
 
 class Sound_manager {
-	bool sound_status = 0;
 public:
 	Sound_manager();
 	SoundBuffer swap_buffer;
@@ -12,4 +11,7 @@ public:
 
 	SoundBuffer remove_Buffer;
 	Sound remove_sound;
+
+	SoundBuffer hammer_buffer;
+	Sound hammer_sound;
 };

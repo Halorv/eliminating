@@ -157,6 +157,7 @@
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Bonous_Manager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Prop_manager.cpp" />
     <ClCompile Include="Score_manager.cpp" />
     <ClCompile Include="Sound_manager.cpp" />
     <ClCompile Include="Texture_Data.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Bonous_Manager.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Prop_manager.h" />
     <ClInclude Include="Score_manager.h" />
     <ClInclude Include="Sound_manager.h" />
     <ClInclude Include="Texture_Data.h" />

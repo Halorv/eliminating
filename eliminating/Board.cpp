@@ -1,5 +1,7 @@
+#include <iostream>
 #include "Board.h"
 
+using namespace std;
 string int_to_string(int n) {
 	stringstream ss;
 	ss << n;
@@ -15,7 +17,6 @@ bool Board::valid_index_array(int r, int c) { // ÅĞ¶ÏĞĞÁĞÊÇ·ñºÏ·¨ 5*8
 	if (r >= 0 && r <= 7 && c >= 0 && c <= 4) return true;
 	else return false;
 }
-
 void Board::Generate_explosion_at(int cnt, char type, int r, int c) { // Ïû³ı·½¸ñµÄ±¬Õ¨¶¯»­£¬ÖğÖ¡ÏÔÊ¾
 																	  // cnt±íÊ¾ÓĞ¼¸¸ö¿éĞèÒªÏû³ı£¬type±íÊ¾ÊÇĞĞÉÏµÄ»¹ÊÇÁĞÉÏµÄ£¨Ïû³ı·¢ÉúÔÚĞĞÉÏ»òÁĞÉÏ£©
 	for (int i = 1; i <= 5; i++) { // i±íÊ¾»æÖÆµÚiÖ¡µÄ±¬Õ¨Ğ§¹û
@@ -68,7 +69,8 @@ void Board::Generate_explosion_at(int cnt, char type, int r, int c) { // Ïû³ı·½¸
 			}
 		}
 		if (i < 5) { // ¶¯»­Ö¡Êı¼äÏ¶
-			Sleep(185);
+			if (!Bonous_m.Get_curr_bonous()) Sleep(85);
+			else Sleep(55);
 			window.display();
 		}
 		if (i == 5 && Bonous_m.Get_curr_bonous() > 0) { // »æÖÆÁ¬»÷µÄ¶îÍâ¼Ó·Ö
@@ -77,10 +79,111 @@ void Board::Generate_explosion_at(int cnt, char type, int r, int c) { // Ïû³ı·½¸
 			Bonous_m.text_bonous.setPosition(c * 50 + 255, r * 50 + 20);
 			Bonous_m.draw_bonous_at(window, int_to_string(Bonous_m.Get_curr_bonous() * 5)); // Ã¿´ÎÁ¬»÷¶îÍâ¼Ó5·Ö
 			window.display();
-			Sleep(650);
+			Sleep(200);
 			score_m.Increment_by(5 * Bonous_m.Get_curr_bonous());
 		}
 	}
+}
+bool Board::TL_eliminating(int x, int y, int c) { // cÎª²»Í¬ĞÎ×´µÄ·ÖÀà²ÎÊı
+	Bonous_m.increment();
+	window.clear();
+	draw();
+	window.display();
+	swap_make_chain = true;
+	S_M.remove_sound.play();
+	switch (c % 3) { // TLÀïµÄĞĞ´¦Àí
+		case 1:
+			Generate_explosion_at(2, 'r', x, y + 1);
+			while (x) {
+				sprites[x][y + 1].t = sprites[x - 1][y + 1].t;
+				sprites[x][y + 1].name = sprites[x - 1][y + 1].name;
+				sprites[x][y + 2].t = sprites[x - 1][y + 2].t;
+				sprites[x][y + 2].name = sprites[x - 1][y + 2].name;
+				x--;
+			}
+			sprites[x][y + 1].name = files_name[Generate_candy()];
+			sprites[x][y + 1].t.loadFromFile(sprites[x][y + 1].name);
+			sprites[x][y + 2].name = files_name[Generate_candy()];
+			sprites[x][y + 2].t.loadFromFile(sprites[x][y + 2].name);
+			break;
+		case 2:
+			Generate_explosion_at(1, 'r', x, y - 1);
+			Generate_explosion_at(1, 'r', x, y + 1);
+			while (x) {
+				sprites[x][y + 1].t = sprites[x - 1][y + 1].t;
+				sprites[x][y + 1].name = sprites[x - 1][y + 1].name;
+				sprites[x][y - 1].t = sprites[x - 1][y - 1].t;
+				sprites[x][y - 1].name = sprites[x - 1][y - 1].name;
+				x--;
+			}
+			sprites[x][y + 1].name = files_name[Generate_candy()];
+			sprites[x][y + 1].t.loadFromFile(sprites[x][y + 1].name);
+			sprites[x][y - 1].name = files_name[Generate_candy()];
+			sprites[x][y - 1].t.loadFromFile(sprites[x][y - 1].name);
+			break;
+		case 0:
+			Generate_explosion_at(2, 'r', x, y - 2);
+			while (x) {
+				sprites[x][y - 1].t = sprites[x - 1][y - 1].t;
+				sprites[x][y - 1].name = sprites[x - 1][y - 1].name;
+				sprites[x][y - 2].t = sprites[x - 1][y - 2].t;
+				sprites[x][y - 2].name = sprites[x - 1][y - 2].name;
+				x--;
+			}
+			sprites[x][y - 1].name = files_name[Generate_candy()];
+			sprites[x][y - 1].t.loadFromFile(sprites[x][y - 1].name);
+			sprites[x][y - 2].name = files_name[Generate_candy()];
+			sprites[x][y - 2].t.loadFromFile(sprites[x][y - 2].name);
+			break;
+		default:
+			break;
+	}
+	switch ((c - 1) / 3) { // TLÖĞµÄÁĞ´¦Àí
+		case 0:
+			Generate_explosion_at(3, 'c', x - 1, y);
+			for (int j = x + 1; j >= 0; j--)
+				if (valid_index_array(j - 3, y)) {
+					sprites[j][y].name = sprites[j - 3][y].name;
+					sprites[j][y].t = sprites[j - 3][y].t;
+				}
+				else {
+					sprites[j][y].name = files_name[Generate_candy()];
+					sprites[j][y].t.loadFromFile(sprites[j][y].name);
+				}
+			break;
+		case 1:
+			Generate_explosion_at(3, 'c', x, y);
+			for (int j = x + 2; j >= 0; j--)
+				if (valid_index_array(j - 3, y)) {
+					sprites[j][y].name = sprites[j - 3][y].name;
+					sprites[j][y].t = sprites[j - 3][y].t;
+				}
+				else {
+					sprites[j][y].name = files_name[Generate_candy()];
+					sprites[j][y].t.loadFromFile(sprites[j][y].name);
+				}
+			break;
+		case 2:
+			Generate_explosion_at(3, 'c', x - 2, y);
+			for (int j = x; j >= 0; j--)
+				if (valid_index_array(j - 3, y)) {
+					sprites[j][y].name = sprites[j - 3][y].name;
+					sprites[j][y].t = sprites[j - 3][y].t;
+				}
+				else {
+					sprites[j][y].name = files_name[Generate_candy()];
+					sprites[j][y].t.loadFromFile(sprites[j][y].name);
+				}
+			break;
+		default:
+			return false;
+	}
+	score_m.Increment_by(50);
+	Sleep(400);
+	window.clear();
+	draw();
+	window.display();
+	return true;
 }
 
 bool Board::Check_col_remove(int col) { // ¼ì²éÁĞÉÏÓĞÃ»ÓĞÏû³ıÁ´
@@ -88,9 +191,25 @@ bool Board::Check_col_remove(int col) { // ¼ì²éÁĞÉÏÓĞÃ»ÓĞÏû³ıÁ´
 	bool again = false;
 	for (int i = 2; i < 8; i++)
 		if (sprites[i][col].name == sprites[i - 1][col].name && sprites[i][col].name == sprites[i - 2][col].name) {
+			for (int j = i - 2; j < i + 1; j++) {//ÅĞ¶ÏÊÇ·ñÎªTLÏû³ıÒÔ¼°ĞÎ×´
+				if (col + 2 < 5 && sprites[j][col].name == sprites[j][col + 1].name && sprites[j][col].name == sprites[j][col + 2].name) {
+					if (j == i - 2) return TL_eliminating(j, col, 7);
+					else if (j == i - 1) return TL_eliminating(j, col, 1);
+					else if (j == i) return TL_eliminating(j, col, 4);
+				}
+				else if (col + 1 < 5 && col - 1 >= 0 && sprites[j][col].name == sprites[j][col + 1].name && sprites[j][col].name == sprites[j][col - 1].name) {
+					if (j == i - 2) return TL_eliminating(j, col, 8);
+					else if (j == i - 1) return TL_eliminating(j, col, 2);
+					else if (j == i) return TL_eliminating(j, col, 5);
+				}
+				else if (col - 2 >= 0 && sprites[j][col].name == sprites[j][col - 1].name && sprites[j][col].name == sprites[j][col - 2].name) {
+					if (j == i - 2) return TL_eliminating(j, col, 9);
+					else if (j == i - 1) return TL_eliminating(j, col, 3);
+					else if (j == i) return TL_eliminating(j, col, 6);
+				}
+			}
 			again = true; // ÊÇ·ñÁ¬ĞøÏû³ı
 			Bonous_m.increment();
-			//Bonous_m.start_again();
 			window.clear();
 			draw();
 			window.display();
@@ -98,26 +217,25 @@ bool Board::Check_col_remove(int col) { // ¼ì²éÁĞÉÏÓĞÃ»ÓĞÏû³ıÁ´
 			int tempI = i;
 			while (tempI + 1 < 8 && sprites[tempI + 1][col].name == sprites[tempI][col].name) // »ñµÃ×î³¤Ïû³ıÁ´
 				cnt++, tempI++;
+
 			swap_make_chain = true;
 			S_M.remove_sound.play(); // Ïû³ıÒôĞ§
-
 			Generate_explosion_at(cnt + 3, 'c', i - 2, col);
 			i = tempI;
 			for (int j = i; j >= 0; j--) // ·½¿é´ÓÉÏÍùÏÂµôÂä
 				if (valid_index_array(j - 3 - cnt, col)) {
 					sprites[j][col].name = sprites[j - 3 - cnt][col].name;
-				    sprites[j][col].t = sprites[j - 3 - cnt][col].t;
+					sprites[j][col].t = sprites[j - 3 - cnt][col].t;
 				}
 				else {
 					sprites[j][col].name = files_name[Generate_candy()]; // Ëæ»úÉú³É·½¿é
 					sprites[j][col].t.loadFromFile(sprites[j][col].name);
 				}
 			score_m.Increment_by(30 + cnt * 10); // »ù´¡µÃ·Ö30£¬³¤¶ÈÃ¿¼Ó1µÃ10·Ö
-			Sleep(800);
+			Sleep(400);
 			window.clear();
 			draw();
 			window.display();
-		//	Sleep(800);
 		}
 	return again;
 }
@@ -127,20 +245,35 @@ bool Board::Check_row_remove(int row) {
 	bool again = false;
 	for (int i = 2; i < 5; i++) {
 		if (sprites[row][i].name == sprites[row][i - 1].name && sprites[row][i].name == sprites[row][i - 2].name) {
+			for (int j = i; j > i - 3; j--) // ÅĞ¶ÏÊÇ·ñÎªTLÏû³ıÒÔ¼°ĞÎ×´
+				if (row - 2 >= 0 && sprites[row][j].name == sprites[row - 1][j].name && sprites[row][j].name == sprites[row - 2][j].name) {
+					if (j == i) return TL_eliminating(row, j, 6);
+					else if (j == i - 1) return TL_eliminating(row, j, 5);
+					else if (j == i - 2) return TL_eliminating(row, j, 4);
+				}
+				else if (row + 2 < 5 && sprites[row][j].name == sprites[row + 1][j].name && sprites[row][j].name == sprites[row + 2][j].name) {
+					if (j == i) return TL_eliminating(row, j, 9);
+					else if (j == i - 1) return TL_eliminating(row, j, 8);
+					else if (j == i - 2) return TL_eliminating(row, j, 7);
+				}
+				else if (row + 1 < 5 && row - 1 >= 0 && sprites[row][j].name == sprites[row + 1][j].name && sprites[row][j].name == sprites[row - 1][j].name) {
+					if (j == i) return TL_eliminating(row, j, 3);
+					else if (j == i - 1) return TL_eliminating(row, j, 2);
+					else if (j == i - 2) return TL_eliminating(row, j, 1);
+				}
 			again = true;
 			Bonous_m.increment();
-			window.clear();       
+			window.clear();
 			draw();
 			window.display();
+
 			int tempI = i;
 			while (tempI + 1 < 5 && sprites[row][tempI].name == sprites[row][tempI + 1].name)
 				cnt++, tempI++;
 
 			swap_make_chain = true;
 			S_M.remove_sound.play();
-
 			Generate_explosion_at(cnt + 3, 'r', row, i - 2);
-
 			while (row) { // ´ÓÏÂÍùÉÏÖğĞĞ´¦Àí
 				/****************Ïû³ı¾ÉµÄ·½¿é****************/
 				if (cnt > 0) { // 4Á¬
@@ -176,11 +309,10 @@ bool Board::Check_row_remove(int row) {
 			sprites[row][i - 2].t.loadFromFile(sprites[row][i - 2].name);
 
 			score_m.Increment_by(30 + 10 * cnt);
-			Sleep(800);
+			Sleep(400);
 			window.clear();
 			draw();
 			window.display();
-		//	Sleep(800);
 		}
 	}
 	return again;
@@ -193,7 +325,7 @@ void Board::Check_board() { // µİ¹é²éÕÒÊÇ·ñÓĞ¿ÉÒÔÏû³ıµÄ¿é
 
 Board::Board() {
 	window.create(VideoMode(960, 437), "Game");
-	window.setPosition(sf::Vector2i(100, 50));
+	window.setPosition(sf::Vector2i(500, 500)); // ÓÎÏ·´°¿Ú³öÏÖÔÚÆÁÄ»µÄÎ»ÖÃ
 	swap_make_chain = false;
 	files_name[0] = "images/png/hat.png";
 	files_name[1] = "images/png/clothes.png";
@@ -237,9 +369,16 @@ void Board::load() {
 			sprites[i][j].type = 'D'; // Ä¬ÈÏDeactivate
 			sprites[i][j].s.setPosition(j * 50 + 255, i * 50 + 20); // ¾ØÕóÎ»ÖÃ
 		}
+
+	prop_data.hammer.setPosition(562, 40); // ´¸×Ó
+	mouse_hammer = prop_data.hammer;
+	prop_data.swap.setPosition(564, 103); // ½»»»
+	mouse_swap = prop_data.swap;
+	prop_data.refresh.setPosition(563, 162); // Ë¢ĞÂÆåÅÌ
+	mouse_refresh = prop_data.refresh;
 }
 
-bool Board:: valid_cell_window_domain(int x, int y) { // ÅĞ¶ÏÊó±êÖ¸ÕëÊÇ·ñÔÚÓĞĞ§µÄÎ»ÖÃ
+bool Board::valid_cell_window_domain(int x, int y) { // ÅĞ¶ÏÊó±êÖ¸ÕëÊÇ·ñÔÚÓĞĞ§µÄÎ»ÖÃ
 	if (x >= 255 && x <= 505 && y >= 20 && y <= 420 && x % 50 != 0 && y % 50 != 0) return true;
 	else return false;
 }
@@ -251,32 +390,49 @@ char valid_swap_cell(int x2cany, int y2canyd, int sourcX, int sourcY) { // yĞĞ x
 	else if (sourcX - x2cany == 1 && y2canyd == sourcY) return 'l'; // ×ó
 	else return 'n';
 }
+int valid_prop_domain(int x, int y) {
+	if (x < 562 || y < 40) return 0;
+	else if (x >= 562 && x <= 602 && y >= 40 && y <= 80) return 1; // ÈıÖÖµÀ¾ß
+	else if (x > 564 && x <= 604 && y >= 103 && y <= 143) return 2;
+	else if (x > 563 && x <= 603 && y >= 162 && y <= 202) return 3;
+	else return 0;
+}
 
 void Board::Control_mouse_events(RenderWindow &window) { // Êó±êÊÂ¼ş
 	sf::Event event;
+	//int prop_type = 0, prop_manu = 0;
 	static int xx_prev = -1, yy_prev = -1; // ½»»»²Ù×÷ĞèÒªµã»÷Á½¸ö¿é£¬prev¼ÇÂ¼µÚÒ»¸ö¿é
 	while (window.pollEvent(event)) {
 		switch (event.type) {
 			case sf::Event::Closed: // ¹Ø±Õ´°¿Ú
 				window.close();
 			break;
-			case sf::Event::MouseButtonPressed: // Êó±ê°´ÏÂ
-				if (event.mouseButton.button == sf::Mouse::Left && valid_cell_window_domain(event.mouseButton.x, event.mouseButton.y)) {
-					int x, y;
-					x = event.mouseButton.x; y = event.mouseButton.y;
+			case sf::Event::MouseButtonPressed: {// Êó±ê°´ÏÂ
+				int x, y;
+				x = event.mouseButton.x; y = event.mouseButton.y;
+				if (event.mouseButton.button == sf::Mouse::Left && valid_cell_window_domain(x, y) && !prop_type && !prop_manu) { // ½»»»²Ù×÷
 					if (xx_prev != -1 && yy_prev != -1) sprites[yy_prev][xx_prev].type = 'D';
 					x -= 255; y -= 20;
 					x /= 50; y /= 50;
 					sprites[y][x].type = 'A'; // ×ø±ê½øĞĞ±ä»»ºó¶ÔÓ¦µ½ÏàÓ¦µÄ¿éÉÏ£¬ÉèÖÃ¸Ã¿éÎªActivate
-											  // x×ø±êÄÜÖªµÀÊÇµÚ¼¸ÁĞ£¬y×ø±êÄÜÖªµÀÊÇµÚ¼¸ĞĞ
+					// x×ø±êÄÜÖªµÀÊÇµÚ¼¸ÁĞ£¬y×ø±êÄÜÖªµÀÊÇµÚ¼¸ĞĞ
 					xx_prev = x; yy_prev = y;
 				}
+				else if (event.mouseButton.button == sf::Mouse::Left && valid_prop_domain(x, y) && !prop_type && !prop_manu) { // ÔÚµÀ¾ßÇøµã»÷µÀ¾ß
+					prop_type = valid_prop_domain(x, y);
+					prop_manu = 0;
+				}
+				else if (event.mouseButton.button == sf::Mouse::Left && valid_cell_window_domain(x, y) && prop_type && !prop_manu) { // ÔÚÓÎÏ·Çøµã»÷µÀ¾ß
+					prop_manu = prop_type;
+				}
+			}
 			case sf::Event::MouseButtonReleased: { // Êó±êËÉ¿ª
 				int x, y;
 				x = event.mouseButton.x; y = event.mouseButton.y;
-				x -= 255; y -= 20;
-				x /= 50; y /= 50;
-				if (valid_swap_cell(x, y, xx_prev, yy_prev) != 'n' && valid_index_array(y, x)) { // ¼ì²éÊÇ·ñÊÇÓĞĞ§µÄ½»»»here check vaild adjacent swap to the (prev selection)
+				//cout << x << " " << y << " " << valid_prop_domain(x, y) << " " << prop_type << " " << prop_manu << endl;
+				if (valid_swap_cell((x - 255) / 50, (y - 20) / 50, xx_prev, yy_prev) != 'n' && valid_index_array((y - 20) / 50, (x - 255) / 50) && !prop_type && !prop_manu) { // Ö´ĞĞ½»»»²Ù×÷
+					x -= 255; y -= 20;
+					x /= 50; y /= 50;
 					swap(sprites[y][x].t, sprites[yy_prev][xx_prev].t); // ½»»»·½¿é²ÄÖÊ
 					swap(sprites[y][x].name, sprites[yy_prev][xx_prev].name); // ½»»»·½¿éÃû³Æ
 					sprites[yy_prev][xx_prev].type = 'D';
@@ -300,7 +456,7 @@ void Board::Control_mouse_events(RenderWindow &window) { // Êó±êÊÂ¼ş
 						window.clear();
 						draw();
 						window.display();
-						Sleep(600);
+						Sleep(500);
 						swap(sprites[y][x].t, sprites[yy_prev][xx_prev].t);
 						swap(sprites[y][x].name, sprites[yy_prev][xx_prev].name);
 						sprites[y][x].s.setTexture(sprites[y][x].t);
@@ -309,10 +465,77 @@ void Board::Control_mouse_events(RenderWindow &window) { // Êó±êÊÂ¼ş
 						S_M.swap_sound.play(); // »»»ØÀ´ÔÙ·¢Ò»Éù
 					}
 				}
+				else if (valid_prop_domain(x, y) && prop_type && !prop_manu) { // µÀ¾ßÇøËÉ¿ªµÀ¾ß£¬»æÖÆÊó±ê¸úËæ
+					if (prop_type == 1) {
+						mouse_draw_hammer = 1;
+					}
+					else if (prop_type == 2) {
+						mouse_draw_swap = 1;
+					}
+					else if (prop_type == 3) { // ÖØ»æÆåÅÌ
+						S_M.swap_sound.play();
+						load();
+						window.clear();
+						draw();
+						window.display();
+						Check_board();
+						prop_type = 0;
+						prop_manu = 0;
+					}
+				}
+				else if (valid_cell_window_domain(x, y) && prop_type && prop_manu) { // ÓÎÏ·ÇøËÉ¿ªµÀ¾ß£¬Ö´ĞĞ²Ù×÷
+					x -= 255; y -= 20;
+					x /= 50; y /= 50;
+					int i = y, col = x;
+					if (prop_manu == 1) { // ÈÎÒâÏû³ıÄ³¸ö·½¿é
+						mouse_draw_hammer = 0;
+						S_M.hammer_sound.play();
+						Generate_explosion_at(1, 'r', i, col);
+						for (int j = i; j >= 0; j--) // ·½¿é´ÓÉÏÍùÏÂµôÂä
+							if (valid_index_array(j - 1, col)) {
+								sprites[j][col].name = sprites[j - 1][col].name;
+								sprites[j][col].t = sprites[j - 1][col].t;
+							}
+							else {
+								sprites[j][col].name = files_name[Generate_candy()]; // Ëæ»úÉú³É·½¿é
+								sprites[j][col].t.loadFromFile(sprites[j][col].name);
+							}
+						Sleep(400);
+						Check_board();
+						window.clear();
+						draw();
+						window.display();
+						prop_type = 0;
+						prop_manu = 0;
+					}
+					else if (prop_manu == 2) { // ½»»»Á½¸ö·½¿é
+						if (swap_num == 1) { // Ñ¡ÖĞµÚÒ»¸ö·½¿é
+							swap_num = 2;
+							swap_first_x = y, swap_first_y = x;
+							sprites[swap_first_x][swap_first_y].type = 'A';
+						}
+						else if (swap_num == 2) { // µÚ¶ş¸ö·½¿é
+							swap_num = 1;
+							mouse_draw_swap = 0;
+							S_M.swap_sound.play();
+							int swap_second_x = y, swap_second_y = x;
+							window.clear();
+							draw();
+							window.display();
+							swap(sprites[swap_first_x][swap_first_y].t, sprites[swap_second_x][swap_second_y].t);
+							swap(sprites[swap_first_x][swap_first_y].name, sprites[swap_second_x][swap_second_y].name);
+							sprites[swap_first_x][swap_first_y].s.setTexture(sprites[swap_first_x][swap_first_y].t);
+							sprites[swap_second_x][swap_second_y].s.setTexture(sprites[swap_second_x][swap_second_y].t);
+							sprites[swap_first_x][swap_first_y].type = 'D';
+							Check_board(); // ½»»»ºó¼ì²éÓĞÃ»ÓĞ¿ÉÏû³ıµÄ
+							prop_type = 0;
+							prop_manu = 0;
+						}
+					}
+				}
 			}
 			break;
-			/*ĞèĞŞ¸Ä*/
-			case sf::Event::MouseMoved: // Êó±êÖ¸µ½Ä³·½¿éÊ±¸øÓè¾Û½¹
+			case sf::Event::MouseMoved: { // Êó±êÖ¸µ½Ä³·½¿éÊ±¸øÓè¾Û½¹
 				if (valid_cell_window_domain(event.mouseMove.x, event.mouseMove.y)) { // x´ú±íÁĞ£¬y´ú±íĞĞ
 					int x, y;
 					x = event.mouseMove.x; y = event.mouseMove.y;
@@ -321,6 +544,21 @@ void Board::Control_mouse_events(RenderWindow &window) { // Êó±êÊÂ¼ş
 					texture_data.effec.setPosition(x * 50 + 255, y * 50 + 20);
 					window.draw(texture_data.effec);
 				}
+				if (mouse_draw_hammer) { // µÀ¾ß¸úËæÊó±êÒÆ¶¯£¬ÔÚÕâÀïÈ·¶¨Ã¿Ö¡µÄÎ»ÖÃ
+					int x = event.mouseMove.x, y = event.mouseMove.y;
+					mouse_hammer.setPosition(x, y);
+					window.clear();
+					draw();
+					window.display();
+				}
+				if (mouse_draw_swap) {
+					int x = event.mouseMove.x, y = event.mouseMove.y;
+					mouse_swap.setPosition(x, y);
+					window.clear();
+					draw();
+					window.display();
+				}
+			}
 			break;
 		}
 	}
@@ -329,12 +567,54 @@ void Board::draw() {
 	window.draw(texture_data.rectangle); // »æÖÆ±³¾°
 	texture_data.text_score.setString(int_to_string(score_m.Get_curr_score())); // ÀàĞÍ×ª»»
 	window.draw(texture_data.text_score); // »æÖÆµÃ·Ö
+	window.draw(prop_data.hammer); // »æÖÆÈı¸öµÀ¾ß
+	window.draw(prop_data.swap);
+	window.draw(prop_data.refresh);
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 5; j++) {
 			if (sprites[i][j].type == 'A') { // Ñ¡ÖĞµÄ¿é¸øÓè¾Û½¹
 				texture_data.effec.setPosition(j * 50 + 255, i * 50 + 20);
 				window.draw(texture_data.effec);
 			}
-			window.draw(sprites[i][j].s);
+			window.draw(sprites[i][j].s); // Î´Ñ¡ÖĞ¾ÍÖ»»æÖÆ·½¿é
 		}
+	if (mouse_draw_hammer) window.draw(mouse_hammer); // µÀ¾ß¸úËæÊó±êÒÆ¶¯
+	if (mouse_draw_swap) window.draw(mouse_swap);
+}
+
+bool Board::check_end() {
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 5; j++) {
+			if (i < 6 && sprites[i][j].name == sprites[i + 1][j].name && sprites[i + 1][j].name == sprites[i + 2][j].name) return false;
+			if (j < 3 && sprites[i][j].name == sprites[i][j + 1].name && sprites[i][j + 1].name == sprites[i][j + 2].name) return false;
+		}
+	return true;
+}
+
+void Board::exchange_check() {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 4; j++) {
+			char temp = sprites[i][j].type;
+			sprites[i][j].type = sprites[i][j + 1].type;
+			sprites[i][j + 1].type = temp;
+
+			bool end = check_end();
+			if (!end) return;
+			sprites[i][j + 1].type = sprites[i][j].type;
+			sprites[i][j].type = temp;
+		}
+	}
+	for (int k = 0; k < 7; k++) {
+		for (int l = 0; l < 5; l++) {
+			char temp2 = sprites[k][l].type;
+			sprites[k][l].type = sprites[k + 1][l].type;
+			sprites[k + 1][l].type = temp2;
+
+			bool end2 = check_end();
+			if (!end2) return;
+			sprites[k + 1][l].type = sprites[k][l].type;
+			sprites[k][l].type = temp2;
+		}
+	}
+	load();
 }

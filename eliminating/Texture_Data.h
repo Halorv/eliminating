@@ -17,5 +17,6 @@ public:
 
 	sf::Font font;
 	sf::Text text_score;
+
 	Texture_Data();
 };
